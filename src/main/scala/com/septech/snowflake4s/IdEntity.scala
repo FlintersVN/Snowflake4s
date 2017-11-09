@@ -13,10 +13,14 @@
  *
  *
  */
-package com.septech.snowflake4s.node
+package com.septech.snowflake4s
 
-trait NodeMachine {
+case class IdEntity(id: Long) {
 
-  def getId(): String
+  def getLong: Long = id
+
+  def getString: String = id.toString
+
+  def getByte: Array[Byte] = id.toString.map(_.toByte).toArray
 
 }

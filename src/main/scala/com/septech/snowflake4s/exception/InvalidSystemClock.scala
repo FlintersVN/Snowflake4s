@@ -13,10 +13,6 @@
  *
  *
  */
-package com.septech.snowflake4s.node
+package com.septech.snowflake4s.exception
 
-trait NodeMachine {
-
-  def getId(): String
-
-}
+class InvalidSystemClock(msg: String = "Invalid system clock") extends Exception
