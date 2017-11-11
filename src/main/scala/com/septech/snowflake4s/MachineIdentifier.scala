@@ -15,8 +15,10 @@
  */
 package com.septech.snowflake4s
 
-trait NodeMachine {
+trait MachineIdentifier {
 
   def getId(): String
+
+  def getWorkerId(): String
 
 }

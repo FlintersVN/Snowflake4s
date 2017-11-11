@@ -13,18 +13,19 @@
  *
  *
  */
-package com.septech.snowflake4s.node
+package com.septech.snowflake4s.identifier
 
+import java.lang.management.ManagementFactory
 import java.net._
 
-import com.septech.snowflake4s.NodeMachine
+import com.septech.snowflake4s.MachineIdentifier
 import com.septech.snowflake4s.exception.MacAddressException
 
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-private[snowflake4s] class MachineMACAddress extends NodeMachine {
+private[snowflake4s] class MachineMACAddress extends MachineIdentifier {
 
   override def getId(): String = Try {
     val localNetworkInterface = NetworkInterface.getByInetAddress(InetAddress.getLocalHost)
@@ -39,4 +40,8 @@ private[snowflake4s] class MachineMACAddress extends NodeMachine {
     case Success(address) => address
   }
 
+  override def getWorkerId() = {
+    ManagementFactory.getRuntimeMXBean.getName.split("@").headOption
+      .fold(throw new RuntimeException("Can not get process id of application"))(pid => pid)
+  }
 }

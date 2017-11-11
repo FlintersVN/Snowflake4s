@@ -20,11 +20,11 @@ import net.codingwell.scalaguice.InjectorExtensions._
 
 object Snowflake4s {
   private val injector = Guice.createInjector(new GeneratorModule())
-  private val defaultInstance: Generator = injector.instance[Generator]
+  private val idGeneratorImpl: Generator = injector.instance[Generator]
 
-  def getGenerator: Generator = defaultInstance
+  def generator: Generator = idGeneratorImpl
 
   def main(args: Array[String]): Unit = {
-    Snowflake4s.getGenerator.bulkGenerate(10).foreach(println)
+    Snowflake4s.generator.bulkGenerate(40000).foreach(println)
   }
 }

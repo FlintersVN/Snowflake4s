@@ -5,6 +5,7 @@ version := "0.0.1-ALPHA"
 scalaVersion := "2.12.3"
 
 libraryDependencies ++= Seq(
+  "com.typesafe" % "config" % "1.3.1",
   "com.google.inject" % "guice" % "4.1.0",
   "net.codingwell" %% "scala-guice" % "4.1.0"
 )

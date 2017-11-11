@@ -15,7 +15,6 @@
  */
 package com.septech.snowflake4s.algorithms
 
-import java.lang.management.ManagementFactory
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.Month
@@ -27,7 +26,7 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.septech.snowflake4s.Generator
 import com.septech.snowflake4s.IdEntity
-import com.septech.snowflake4s.NodeMachine
+import com.septech.snowflake4s.MachineIdentifier
 import com.septech.snowflake4s.exception.GenerateException
 import com.septech.snowflake4s.exception.InvalidSystemClock
 
@@ -37,7 +36,7 @@ import scala.util.Success
 import scala.util.Try
 
 @Singleton
-private[snowflake4s] class Snowflake @Inject()(nodeIdentifier: NodeMachine) extends Generator {
+private[snowflake4s] class Snowflake @Inject()(identifier: MachineIdentifier) extends Generator {
   /**
     *  This is a Custom Epoch, mean for reference time: October 18, 1989, 16:53:40 UTC -
     *  The date of Galileo Spacecraft was launched to explored Jupiter and its moon from Kennedy Space Center, Florida, US.
@@ -53,27 +52,17 @@ private[snowflake4s] class Snowflake @Inject()(nodeIdentifier: NodeMachine) exte
   private final val lock = new ReentrantLock()
   private var sequence: Long = 0L
 
-  /**
-    * Twitter's Snowflake schema:
-    *   ID = (Time << 22 | NodeID << 10 | sequence)
-    *
-    * In which:
-    * - 41 bits for time in milliseconds. This mean UTC epoch gives us 69 years.
-    * - 10 bits that represent the Machine or Node Id, gives us up to 1024 machines id
-    * - 12 bits that represent an auto-incrementing sequence, modulus 4096.
-    *   This means we can generate 4096 IDs, per Node, per millisecond
-    */
-  final private val workerIdBits = 5L
-  final private val datacenterIdBits = 5L
-  final private val sequenceBits = 12L
-  final private val workerIdShift = sequenceBits
-  final private val machineIdShift = sequenceBits + workerIdBits
-  final private val timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits
-  final private val sequenceMask = -1L ^ (-1L << sequenceBits)
-  final private var lastTimestamp = -1L
+  final private val workerIdBits: Long = 5L
+  final private val datacenterIdBits: Long = 5L
+  final private val sequenceBits: Long = 12L
+  final private val workerIdShift: Long = sequenceBits
+  final private val machineIdShift: Long = sequenceBits + workerIdBits
+  final private val timestampLeftShift: Long = sequenceBits + workerIdBits + datacenterIdBits
+  final private val sequenceMask: Long = -1L ^ (-1L << sequenceBits)
+  final private var lastTimestamp: Long = -1L
 
-  final private val MACHINE_ID: Long = nodeIdentifier.getId().toLong
-  final private val WORKER_ID: Long = getProcessId
+  final private val MACHINE_ID: Long = identifier.getId().toLong
+  final private val WORKER_ID: Long = identifier.getWorkerId().toLong
 
   override def generate(): String = bulkGenerate(1).headOption.fold[String](throw new GenerateException)(id => id)
 
@@ -87,10 +76,12 @@ private[snowflake4s] class Snowflake @Inject()(nodeIdentifier: NodeMachine) exte
   }
 
   private def generateIds(batch: Int): List[IdEntity] = synchronized {
+    require(batch > 0, new IllegalArgumentException("batch must be a non negative number"))
+
     Try {
       val ids = new ListBuffer[IdEntity]()
 
-      (STARTING_SEQUENCE_NUMBERS to batch).map(_ => ids += nextId())
+      (STARTING_SEQUENCE_NUMBERS to batch).foreach(_ => ids += nextId)
 
       ids.toList
     }  match {
@@ -99,7 +90,7 @@ private[snowflake4s] class Snowflake @Inject()(nodeIdentifier: NodeMachine) exte
     }
   }
 
-  private def nextId(): IdEntity = {
+  private def nextId: IdEntity = {
     var currentTimestamp: Long = Clock.systemUTC().millis()
 
     if (currentTimestamp < lastTimestamp) {
@@ -119,13 +110,12 @@ private[snowflake4s] class Snowflake @Inject()(nodeIdentifier: NodeMachine) exte
 
     lastTimestamp = currentTimestamp
 
-    val id =
-      ((currentTimestamp - EPOCH) << timestampLeftShift) |
-      (MACHINE_ID << machineIdShift) |
-      (WORKER_ID << workerIdShift) |
+    IdEntity(
+      (currentTimestamp - EPOCH) << timestampLeftShift |
+      MACHINE_ID << machineIdShift |
+      WORKER_ID << workerIdShift |
       sequence
-
-    IdEntity(Math.abs(id))
+    )
   }
 
   private def nextMillis(lastTimestamp: Long): Long = {
@@ -134,10 +124,6 @@ private[snowflake4s] class Snowflake @Inject()(nodeIdentifier: NodeMachine) exte
       timestamp = Clock.systemUTC().millis()
     }
     timestamp
-  }
-
-  protected[snowflake4s] def getProcessId: Long = {
-    ManagementFactory.getRuntimeMXBean.getName.split("@").headOption.map(_.toLong).fold(throw new Exception)(pid => pid)
   }
 
 }
