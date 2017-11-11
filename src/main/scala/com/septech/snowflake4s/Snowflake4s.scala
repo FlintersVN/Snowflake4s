@@ -25,6 +25,6 @@ object Snowflake4s {
   def getGenerator: Generator = defaultInstance
 
   def main(args: Array[String]): Unit = {
-    Snowflake4s.getGenerator.generateByBatch(10).foreach(println)
+    Snowflake4s.getGenerator.bulkGenerate(10).foreach(println)
   }
 }

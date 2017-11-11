@@ -17,6 +17,7 @@ package com.septech.snowflake4s.node
 
 import java.net._
 
+import com.septech.snowflake4s.NodeMachine
 import com.septech.snowflake4s.exception.MacAddressException
 
 import scala.util.Failure
@@ -30,10 +31,9 @@ private[snowflake4s] class MachineMACAddress extends NodeMachine {
 
     localNetworkInterface
       .getHardwareAddress.toList
-      .map(b => String.format("%02x", b.asInstanceOf[Object]))
-      .map(Integer.parseInt(_, 16)).foldLeft(0L) {
-        case (acc, item) => acc * 256 + item
-      }.toString
+      .map(byte => Integer.parseInt(String.format("%02x", byte.asInstanceOf[Object]), 16))
+      .foldLeft(0L) { case (acc, item) => acc * 256 + item }
+      .toString
   } match {
     case Failure(_) => throw new MacAddressException()
     case Success(address) => address

@@ -19,6 +19,6 @@ trait Generator {
 
   def generate(): String
 
-  def generateByBatch(batch: Int): List[String]
+  def bulkGenerate(batch: Int): List[String]
 
 }

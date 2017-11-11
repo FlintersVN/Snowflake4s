@@ -13,7 +13,7 @@
  *
  *
  */
-package com.septech.snowflake4s.node
+package com.septech.snowflake4s
 
 trait NodeMachine {
 
