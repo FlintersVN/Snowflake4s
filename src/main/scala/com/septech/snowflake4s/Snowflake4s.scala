@@ -24,7 +24,4 @@ object Snowflake4s {
 
   def generator: Generator = idGeneratorImpl
 
-  def main(args: Array[String]): Unit = {
-    Snowflake4s.generator.bulkGenerate(40000).foreach(println)
-  }
 }
