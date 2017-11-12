@@ -17,13 +17,13 @@ package com.septech.snowflake4s
 
 import com.google.inject.AbstractModule
 import com.septech.snowflake4s.algorithms.Snowflake
-import com.septech.snowflake4s.identifier.SnowflakeIdentifier
+import com.septech.snowflake4s.identifier.MaskConfig
 import net.codingwell.scalaguice.ScalaModule
 
 class GeneratorModule extends AbstractModule with ScalaModule {
 
   override def configure() = {
-    bind[MachineIdentifier].to[SnowflakeIdentifier]
+    bind[MachineIdentifier].to[MaskConfig]
     bind[Generator].to[Snowflake]
   }
 
