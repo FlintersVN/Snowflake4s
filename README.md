@@ -6,11 +6,12 @@ The name of this lib was inspired by a project from Twitter called "Snowflake".
 So, it's using the same encoded ID format as Twitter's Snowflake.
 But Snowflake4s providing the easier way to use Snowflake schema.
 
-##Get Started
+## Get Started
 You should add the following dependency.
 ```sbtshell
 libraryDependencies += "com.septech" %% "snowflake4s_2.12" % "0.0.1-ALPHA"
 ```
+
 Add manual config to `application.conf`:
 ```hocon
 snowflake4s {
@@ -21,7 +22,7 @@ snowflake4s {
 }
 ```
 
-##How to use
+## How to use
 to generate id:
 ```scala
 val IdGenerator = Snowflake4s.generator
@@ -36,10 +37,10 @@ val IdGenerator = Snowflake4s.generator
 val ids = IdGenerator.bulkGenerate(10)
 ```
 
-##License
+## License
 The Snowflake4s is released under version 2.0 of the Apache License.
 
-##References
+## References
 - Twitter Snowflake
   - https://github.com/twitter/snowflake/tree/scala_28
   - https://blog.twitter.com/2010/announcing-snowflake
