@@ -1,10 +1,7 @@
 # Snowflake4s
 **A k-sortable unique ID generation lib using Scala.**
 
-Snowflake4s can generate the roughly-sorted 64 bits ids as Long type.
-The name of this lib was inspired by a project from Twitter called "Snowflake".
-So, it's using the same encoded ID format as Twitter's Snowflake.
-But Snowflake4s providing the easier way to use Snowflake schema.
+Snowflake4s can generate the roughly-sorted 64 bits ids as Long type. The name of this lib was inspired by a project from Twitter called "Snowflake". So, it's using the same encoded ID format as Twitter's Snowflake. But Snowflake4s providing the easier way to use Snowflake schema.
 
 ## Get Started
 You should add the following dependency.
