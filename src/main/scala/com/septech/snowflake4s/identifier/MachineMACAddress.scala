@@ -27,21 +27,40 @@ import scala.util.Try
 
 private[snowflake4s] class MachineMACAddress extends MachineIdentifier {
 
-  override def getId(): String = Try {
-    val localNetworkInterface = NetworkInterface.getByInetAddress(InetAddress.getLocalHost)
+  override def getId: String = Try {
+    val localNetworkInterface = MachineMACAddress.guessBestInterface
 
-    localNetworkInterface
-      .getHardwareAddress.toList
-      .map(byte => Integer.parseInt(String.format("%02x", byte.asInstanceOf[Object]), 16))
-      .foldLeft(0L) { case (acc, item) => acc * 256 + item }
+    localNetworkInterface.get // NPE here
+      .getHardwareAddress
+      .map(byte => byte & 0xFF)
+      .foldLeft(0L) { (acc, item) => (acc << 8) + item }
       .toString
   } match {
     case Failure(_) => throw new MacAddressException()
     case Success(address) => address
   }
 
-  override def getWorkerId() = {
+  override def getWorkerId: String = {
     ManagementFactory.getRuntimeMXBean.getName.split("@").headOption
       .fold(throw new RuntimeException("Can not get process id of application"))(pid => pid)
   }
+}
+
+private object MachineMACAddress {
+  import scala.collection.JavaConverters._
+
+  def getAvailableInterfaces: Map[String, NetworkInterface] =
+    NetworkInterface.getNetworkInterfaces.asScala
+      .foldLeft(Map.empty[String, NetworkInterface]){ (map, intf) =>
+        if (isValidInterface(intf))
+          map + ((intf.getName, intf))
+        else
+          map
+      }
+
+  def guessBestInterface: Option[NetworkInterface] =
+    getAvailableInterfaces.headOption.map(_._2)
+
+  private def isValidInterface(intf: NetworkInterface): Boolean =
+    Option(intf.getHardwareAddress).isDefined && intf.isUp && !intf.isVirtual
 }
