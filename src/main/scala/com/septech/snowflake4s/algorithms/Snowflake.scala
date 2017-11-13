@@ -61,8 +61,8 @@ private[snowflake4s] class Snowflake @Inject()(identifier: MachineIdentifier) ex
   final private val sequenceMask: Long = -1L ^ (-1L << sequenceBits)
   final private var lastTimestamp: Long = -1L
 
-  final private val MACHINE_ID: Long = identifier.getId().toLong
-  final private val WORKER_ID: Long = identifier.getWorkerId().toLong
+  final private val MACHINE_ID: Long = identifier.getId.toLong
+  final private val WORKER_ID: Long = identifier.getWorkerId.toLong
 
   override def generate(): String = bulkGenerate(1).headOption.fold[String](throw new GenerateException)(id => id)
 

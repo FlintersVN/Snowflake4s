@@ -17,8 +17,8 @@ package com.septech.snowflake4s
 
 trait MachineIdentifier {
 
-  def getId(): String
+  def getId: String
 
-  def getWorkerId(): String
+  def getWorkerId: String
 
 }
