@@ -1,5 +1,4 @@
 ThisBuild / crossScalaVersions := List("2.12.14")
-ThisBuild / version := "0.1.0-SNAPSHOT"
 
 inThisBuild(
   List(
@@ -35,9 +34,9 @@ lazy val root = (project in file("."))
   .settings(
     name := "Snowflake4s",
     libraryDependencies ++= Seq(
-  "com.typesafe" % "config" % "1.3.1",
-  "com.google.inject" % "guice" % "4.1.0",
-  "net.codingwell" %% "scala-guice" % "4.1.0"
+      "com.typesafe" % "config" % "1.3.1",
+      "com.google.inject" % "guice" % "4.1.0",
+      "net.codingwell" %% "scala-guice" % "4.1.0"
     )
   )
   .settings(
