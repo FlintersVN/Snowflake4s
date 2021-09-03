@@ -1,4 +1,4 @@
-ThisBuild / crossScalaVersions := List("2.12.14")
+ThisBuild / crossScalaVersions := List("2.12.14", "2.13.6")
 
 inThisBuild(
   List(
@@ -36,7 +36,7 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       "com.typesafe" % "config" % "1.3.1",
       "com.google.inject" % "guice" % "4.1.0",
-      "net.codingwell" %% "scala-guice" % "4.1.0"
+      "net.codingwell" %% "scala-guice" % "4.2.9"
     )
   )
   .settings(
