@@ -36,7 +36,9 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       "com.typesafe" % "config" % "1.3.1",
       "com.google.inject" % "guice" % "4.1.0",
-      "net.codingwell" %% "scala-guice" % "4.2.9"
+      "net.codingwell" %% "scala-guice" % "4.2.9",
+      "com.github.tototoshi" % "scala-base62_2.10" % "0.1.0",
+      "org.scalatest" %% "scalatest" % "3.2.10" % Test
     )
   )
   .settings(

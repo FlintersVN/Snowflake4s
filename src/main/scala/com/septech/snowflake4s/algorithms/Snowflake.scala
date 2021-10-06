@@ -16,17 +16,10 @@
 package com.septech.snowflake4s.algorithms
 
 import java.time.Clock
-import java.time.LocalDateTime
-import java.time.Month
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.util.concurrent.locks.ReentrantLock
-
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import com.septech.snowflake4s.Generator
-import com.septech.snowflake4s.IdEntity
-import com.septech.snowflake4s.MachineIdentifier
+import com.septech.snowflake4s.{Generator, Id, MachineIdentifier}
 import com.septech.snowflake4s.exception.GenerateException
 import com.septech.snowflake4s.exception.InvalidSystemClock
 
@@ -37,49 +30,34 @@ import scala.util.Try
 
 @Singleton
 private[snowflake4s] class Snowflake @Inject()(identifier: MachineIdentifier) extends Generator {
-  /**
-    *  This is a Custom Epoch, mean for reference time: October 18, 1989, 16:53:40 UTC -
-    *  The date of Galileo Spacecraft was launched to explored Jupiter and its moon from Kennedy Space Center, Florida, US.
-    *
-    *  Galileo is also the name used for the satellite navigation system of the European Union.
-    *  It uses 22 August 1999 for Epoch instead of the Unix Epoch(January 1st, 1970).
-    */
-  final val GALILEO_LAUNCHED_DATETIME: ZonedDateTime =
-    LocalDateTime.of(1989, Month.OCTOBER, 18, 16, 53, 40).atZone(ZoneId.of("US/Eastern"))
-  final val EPOCH: Long = GALILEO_LAUNCHED_DATETIME.toInstant.toEpochMilli
 
   private final val STARTING_SEQUENCE_NUMBERS: Int = 1
   private final val lock = new ReentrantLock()
   private var sequence: Long = 0L
 
-  final private val workerIdBits: Long = 5L
-  final private val datacenterIdBits: Long = 5L
   final private val sequenceBits: Long = 12L
-  final private val workerIdShift: Long = sequenceBits
-  final private val machineIdShift: Long = sequenceBits + workerIdBits
-  final private val timestampLeftShift: Long = sequenceBits + workerIdBits + datacenterIdBits
   final private val sequenceMask: Long = -1L ^ (-1L << sequenceBits)
   final private var lastTimestamp: Long = -1L
 
   final private val MACHINE_ID: Long = identifier.getId.toLong
   final private val WORKER_ID: Long = identifier.getWorkerId.toLong
 
-  override def generate(): String = bulkGenerate(1).headOption.fold[String](throw new GenerateException)(id => id)
+  override def generate(): Id = bulkGenerate(1).headOption.fold[Id](throw new GenerateException)(id => id)
 
-  override def bulkGenerate(batch: Int): List[String] = {
+  override def bulkGenerate(batch: Int): List[Id] = {
     lock.lock()
 
-    val ids = generateIds(batch).map(_.getString)
+    val ids = generateIds(batch)
 
     lock.unlock()
     ids
   }
 
-  private def generateIds(batch: Int): List[IdEntity] = synchronized {
+  private def generateIds(batch: Int): List[Id] = synchronized {
     require(batch > 0, new IllegalArgumentException("batch must be a non negative number"))
 
     Try {
-      val ids = new ListBuffer[IdEntity]()
+      val ids = new ListBuffer[Id]()
 
       (STARTING_SEQUENCE_NUMBERS to batch).foreach(_ => ids += nextId)
 
@@ -90,7 +68,7 @@ private[snowflake4s] class Snowflake @Inject()(identifier: MachineIdentifier) ex
     }
   }
 
-  private def nextId: IdEntity = {
+  private def nextId: Id = {
     var currentTimestamp: Long = Clock.systemUTC().millis()
 
     if (currentTimestamp < lastTimestamp) {
@@ -110,10 +88,10 @@ private[snowflake4s] class Snowflake @Inject()(identifier: MachineIdentifier) ex
 
     lastTimestamp = currentTimestamp
 
-    IdEntity(
-      (currentTimestamp - EPOCH) << timestampLeftShift |
-      MACHINE_ID << machineIdShift |
-      WORKER_ID << workerIdShift |
+    Id(
+      WORKER_ID,
+      MACHINE_ID,
+      currentTimestamp,
       sequence
     )
   }

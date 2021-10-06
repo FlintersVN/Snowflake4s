@@ -17,8 +17,8 @@ package com.septech.snowflake4s
 
 trait Generator {
 
-  def generate(): String
+  def generate(): Id
 
-  def bulkGenerate(batch: Int): List[String]
+  def bulkGenerate(batch: Int): List[Id]
 
 }
