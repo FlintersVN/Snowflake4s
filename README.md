@@ -16,8 +16,15 @@ Add manual config to `application.conf`:
 ```hocon
 snowflake4s {
   twitter { # using Twitter's algorithm
-    machine_id = 1 # from 1 to 31
-    worker_id = 1 # from 1 to 31 
+    machine_id = 1 # from 0 to 31
+    machine_id = ${?SNOWFLAKE4S_MACHINE_ID} # Set machine id from env
+    
+    worker_id = 1 # from 0 to 31 
+    worker_id = ${?SNOWFLAKE4S_WORKER_ID} # Set worker id from env
+
+    # Default Epoch is October 18, 1989, 16:53:40 UTC
+    # You can change to a different epoch by below setting
+    # epoch = "2021-01-01T00:00:00Z" 
   }
 }
 ```
@@ -28,6 +35,13 @@ to generate id:
 val IdGenerator = Snowflake4s.generator
 
 val id = IdGenerator.generate()
+id.toBase62 // 52nlGCNq00n
+id.toLong // 4234436103643992065
+
+// Revert info from saved Id
+
+val id = Id.fromBase62("52nlGCNq00n")
+println(id.workerId) // 5
 ```
 
 You also could bulk generate 10 ids with the following snippet: 
